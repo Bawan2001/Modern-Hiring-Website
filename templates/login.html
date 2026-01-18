@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | JobSphere</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="auth-page">
+    <div class="container">
+        <div class="auth-card">
+            <a href="/" class="logo">Job<span>Sphere</span></a>
+            <h2>Welcome Back</h2>
+            <p>Enter your credentials to access your account</p>
+
+            {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+            {% endif %}
+
+            <form action="/login" method="POST">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" placeholder="e.g. user@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Sign In</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Demo accounts:</p>
+                <ul>
+                    <li>User: user@example.com / user123</li>
+                    <li>Admin: admin@jobsphere.com / admin123</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

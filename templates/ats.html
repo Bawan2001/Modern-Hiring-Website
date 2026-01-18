@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Checker | JobSphere</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="container">
+            <a href="/" class="logo">Job<span>Sphere</span></a>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/ats" class="active">ATS Checker</a></li>
+                    {% if user.role == 'admin' %}
+                    <li><a href="/admin">Admin Hub</a></li>
+                    {% endif %}
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="container">
+            <div class="section-header">
+                <h1>ATS <span>Score Checker</span></h1>
+                <p>Optimize your resume for the specific job description</p>
+            </div>
+
+            <div class="ats-container">
+                <div class="ats-inputs">
+                    <div class="input-card">
+                        <h3>Resume Content</h3>
+                        <textarea id="resume-text" placeholder="Paste your resume text here..."></textarea>
+                    </div>
+                    <div class="input-card">
+                        <h3>Job Description</h3>
+                        <textarea id="job-desc" placeholder="Paste the job requirements here..."></textarea>
+                    </div>
+                    <button id="calculate-btn" class="btn-primary btn-lg">Calculate Score</button>
+                </div>
+
+                <div id="ats-results" class="ats-results hidden">
+                    <div class="score-card">
+                        <div class="score-circle">
+                            <span id="score-value">0%</span>
+                        </div>
+                        <h3>Match Score</h3>
+                    </div>
+
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <h4>Matched Keywords</h4>
+                            <div id="matched-list" class="tag-container"></div>
+                        </div>
+                        <div class="insight-card">
+                            <h4>Suggestions</h4>
+                            <div id="missing-list" class="tag-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
