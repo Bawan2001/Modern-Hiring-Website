@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "title": "Senior Software Engineer",
+        "company": "TechVision Labs",
+        "location": "Remote",
+        "salary": "$120k - $160k",
+        "type": "Full-time",
+        "category": "Engineering",
+        "description": "We are looking for a senior software engineer to join our team."
+    },
+    {
+        "id": 2,
+        "title": "UI/UX Designer",
+        "company": "Creative Minds",
+        "location": "New York, NY",
+        "salary": "$90k - $130k",
+        "type": "Full-time",
+        "category": "Design",
+        "description": "Join our creative team to build stunning user interfaces."
+    }
+]
