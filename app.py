@@ -105,5 +105,97 @@ def calculate_ats():
         "suggestions": list(unique_keywords - set(matched_keywords))[:5] # Suggest some missing ones
     })
 
+APP_DATA_FILE = 'data/applications.json'
+
+def load_applications():
+    if not os.path.exists(APP_DATA_FILE):
+        return []
+    with open(APP_DATA_FILE, 'r') as f:
+        return json.load(f)
+
+def save_applications(apps):
+    os.makedirs(os.path.dirname(APP_DATA_FILE), exist_ok=True)
+    with open(APP_DATA_FILE, 'w') as f:
+        json.dump(apps, f, indent=4)
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    return render_template('dashboard.html', user=session.get('user'))
+
+@app.route('/api/apply', methods=['POST'])
+def apply_job():
+    if 'user' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    data = request.json
+    job_id = data.get('job_id')
+    cover_letter = data.get('cover_letter', '')
+    
+    if not job_id:
+        return jsonify({"error": "Missing job ID"}), 400
+        
+    applications = load_applications()
+    
+    # Check if already applied
+    for app in applications:
+        if app['user_email'] == session['user']['email'] and app['job_id'] == job_id:
+             return jsonify({"error": "Already applied to this job"}), 400
+
+    new_app = {
+        "id": len(applications) + 1,
+        "job_id": job_id,
+        "user_email": session['user']['email'],
+        "user_name": session['user']['name'],
+        "cover_letter": cover_letter,
+        "status": "Pending",
+        "date": "Just now" # simplified date
+    }
+    
+    applications.append(new_app)
+    save_applications(applications)
+    return jsonify(new_app), 201
+
+@app.route('/api/applications', methods=['GET'])
+def get_applications():
+    if 'user' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+        
+    apps = load_applications()
+    jobs = {job['id']: job for job in load_jobs()}
+    
+    # Attach job details to applications
+    for app in apps:
+        job = jobs.get(app['job_id'])
+        if job:
+            app['job_title'] = job['title']
+            app['company'] = job['company']
+            
+    if session['user']['role'] == 'admin':
+        return jsonify(apps)
+    else:
+        # Users see only their own
+        user_apps = [app for app in apps if app['user_email'] == session['user']['email']]
+        return jsonify(user_apps)
+
+@app.route('/api/applications/<int:app_id>/status', methods=['POST'])
+def update_application_status(app_id):
+    if 'user' not in session or session['user']['role'] != 'admin':
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    status = request.json.get('status')
+    if not status:
+         return jsonify({"error": "Missing status"}), 400
+         
+    applications = load_applications()
+    for app in applications:
+        if app['id'] == app_id:
+            app['status'] = status
+            save_applications(applications)
+            return jsonify(app)
+            
+    return jsonify({"error": "Application not found"}), 404
+
 if __name__ == '__main__':
     app.run(debug=True)

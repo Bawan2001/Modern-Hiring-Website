@@ -34,33 +34,58 @@
                         <span class="badge">Admin Access</span>
                     </div>
                     <ul class="admin-nav">
-                        <li class="active"><a href="#">Manage Jobs</a></li>
-                        <li><a href="#">Applications</a></li>
+                        <li class="active" data-tab="jobs"><a href="#">Manage Jobs</a></li>
+                        <li data-tab="applications"><a href="#">Applications</a></li>
                         <li><a href="#">Settings</a></li>
                     </ul>
                 </aside>
 
                 <div class="admin-main">
-                    <div class="action-bar">
-                        <h2>Manage Job Listings</h2>
-                        <button class="btn-primary" id="add-job-trigger">Add New Job</button>
+                    <!-- Jobs Section -->
+                    <div id="section-jobs" class="admin-section">
+                        <div class="action-bar">
+                            <h2>Manage Job Listings</h2>
+                            <button class="btn-primary" id="add-job-trigger">Add New Job</button>
+                        </div>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Company</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-jobs-list">
+                                    <!-- Loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    <div class="admin-table-container">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Company</th>
-                                    <th>Location</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-jobs-list">
-                                <!-- Loaded via JS -->
-                            </tbody>
-                        </table>
+                    <!-- Applications Section -->
+                    <div id="section-applications" class="admin-section hidden">
+                        <div class="action-bar">
+                            <h2>Review Applications</h2>
+                        </div>
+                        <div class="admin-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Candidate</th>
+                                        <th>Role</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-apps-list">
+                                    <!-- Loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

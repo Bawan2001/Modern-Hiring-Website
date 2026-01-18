@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>📍 ${job.location}</span>
                     <span class="job-salary">${job.salary}</span>
                 </div>
+                <button onclick="openApplyModal(${job.id}, '${job.title}')" class="btn-primary" style="width:100%;margin-top:1.5rem">Apply Now</button>
             `;
             jobsContainer.appendChild(jobCard);
         });
@@ -83,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Admin Dashboard Job Loading
+    // 3. Admin Dashboard Job Loading & Apps
     async function fetchAdminJobs() {
         if (!adminJobsList) return;
         try {
@@ -92,6 +93,33 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAdminJobs(jobs);
         } catch (error) {
             console.error('Error fetching admin jobs:', error);
+        }
+    }
+
+    async function fetchAdminApps() {
+        const adminAppsList = document.getElementById('admin-apps-list');
+        if (!adminAppsList) return;
+        try {
+            const response = await fetch('/api/applications');
+            const apps = await response.json();
+
+            adminAppsList.innerHTML = apps.map(app => `
+               <tr>
+                   <td>
+                       <strong>${app.user_name}</strong><br>
+                       <span style="font-size:0.85rem;color:#94a3b8">${app.user_email}</span>
+                   </td>
+                   <td>${app.job_title}</td>
+                   <td>${app.date}</td>
+                   <td><span class="status-badge status-${app.status.toLowerCase()}">${app.status}</span></td>
+                   <td>
+                       <button onclick="updateStatus(${app.id}, 'Interviewing')" class="btn-primary btn-sm">Accept</button>
+                       <button onclick="updateStatus(${app.id}, 'Rejected')" class="btn-secondary btn-sm">Reject</button>
+                   </td>
+               </tr>
+           `).join('');
+        } catch (error) {
+            console.error('Error fetching admin apps:', error);
         }
     }
 
@@ -110,17 +138,32 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
+    // Tab Switching
+    const tabs = document.querySelectorAll('.admin-nav li');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            const target = tab.dataset.tab;
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`section-${target}`).classList.remove('hidden');
+
+            if (target === 'applications') fetchAdminApps();
+        });
+    });
+
     // 4. Modal and Job Posting
     const modal = document.getElementById('job-modal');
     const addJobTrigger = document.getElementById('add-job-trigger');
     const closeModal = document.getElementById('close-modal');
     const addJobForm = document.getElementById('add-job-form');
 
-    if (addJobTrigger) {
+    if (addJobTrigger && modal) {
         addJobTrigger.addEventListener('click', () => modal.classList.add('active'));
     }
 
-    if (closeModal) {
+    if (closeModal && modal) {
         closeModal.addEventListener('click', () => modal.classList.remove('active'));
     }
 
@@ -159,7 +202,103 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 5. User Dashboard
+    const myAppsList = document.getElementById('my-applications');
+    if (myAppsList) {
+        async function fetchMyApps() {
+            try {
+                const response = await fetch('/api/applications');
+                const apps = await response.json();
+
+                document.getElementById('stat-total').innerText = apps.length;
+                document.getElementById('stat-interview').innerText = apps.filter(a => a.status === 'Interviewing').length;
+                document.getElementById('stat-offer').innerText = apps.filter(a => a.status === 'Offer').length;
+
+                if (apps.length === 0) {
+                    myAppsList.innerHTML = '<p style="text-align:center;color:#94a3b8">You haven\'t applied to any jobs yet.</p>';
+                    return;
+                }
+
+                myAppsList.innerHTML = apps.map(app => `
+                    <div class="app-card">
+                        <div class="app-info">
+                            <h4>${app.job_title}</h4>
+                            <p>${app.company}</p>
+                        </div>
+                        <span class="status-badge status-${app.status.toLowerCase()}">${app.status}</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching my apps:', error);
+            }
+        }
+        fetchMyApps();
+    }
+
+    // 6. Apply Logic (Global)
+    window.openApplyModal = (jobId, jobTitle) => {
+        const applyModal = document.getElementById('apply-modal');
+        if (!applyModal) {
+            window.location.href = '/login'; // Redirect if not logged in (modal won't exist usually but logic flow)
+            return;
+        }
+        document.getElementById('apply-job-id').value = jobId;
+        document.getElementById('apply-job-title').innerText = jobTitle;
+        applyModal.classList.add('active');
+    };
+
+    const applyForm = document.getElementById('apply-form');
+    if (applyForm) {
+        document.getElementById('close-apply-modal').addEventListener('click', () => {
+            document.getElementById('apply-modal').classList.remove('active');
+        });
+
+        applyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = applyForm.querySelector('button[type="submit"]');
+            btn.innerText = 'Submitting...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        job_id: parseInt(document.getElementById('apply-job-id').value),
+                        cover_letter: document.getElementById('cover-letter').value
+                    })
+                });
+                if (res.ok) {
+                    alert('Application submitted successfully!');
+                    document.getElementById('apply-modal').classList.remove('active');
+                    applyForm.reset();
+                } else {
+                    const d = await res.json();
+                    alert(d.error || 'Failed to apply');
+                }
+            } catch (err) {
+                alert('Error applying');
+            } finally {
+                btn.innerText = 'Submit Application';
+                btn.disabled = false;
+            }
+        });
+    }
+
+    // Global helper for admin status update
+    window.updateStatus = async (appId, status) => {
+        try {
+            const res = await fetch(`/api/applications/${appId}/status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            if (res.ok) fetchAdminApps();
+        } catch (e) { console.error(e); }
+    };
+
     // Init
     fetchJobs();
     fetchAdminJobs();
+    fetchAdminApps();
 });
