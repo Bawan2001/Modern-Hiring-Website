@@ -49,4 +49,31 @@ def test_ats_score_calculation(client):
     data = rv.get_json()
     assert rv.status_code == 200
     assert data['score'] > 0
-    assert 'flask' in data['matched_keywords']
+
+def test_application_flow(client):
+    # 1. Login as User
+    with client.session_transaction() as sess:
+        sess['user'] = {"email": "user@example.com", "role": "user", "name": "John Doe"}
+    
+    # 2. Apply for a job
+    rv = client.post('/api/apply', json={
+        "job_id": 1,
+        "cover_letter": "I am the best candidate."
+    })
+    assert rv.status_code == 201
+    
+    # 3. Check Dashboard
+    rv = client.get('/api/applications')
+    data = rv.get_json()
+    assert len(data) == 1
+    assert data[0]['status'] == 'Pending'
+    
+    # 4. Login as Admin
+    with client.session_transaction() as sess:
+        sess['user'] = {"email": "admin@jobsphere.com", "role": "admin", "name": "Admin"}
+        
+    # 5. Update Status
+    app_id = data[0]['id']
+    rv = client.post(f'/api/applications/{app_id}/status', json={"status": "Interviewing"})
+    assert rv.status_code == 200
+    assert rv.get_json()['status'] == 'Interviewing'

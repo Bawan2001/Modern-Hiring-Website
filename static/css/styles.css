@@ -143,6 +143,7 @@ nav a.active {
 .hero h1 span {
     background: linear-gradient(to right, var(--primary), var(--accent));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -557,19 +558,96 @@ textarea {
     border-bottom: 1px solid var(--glass-border);
 }
 
-/* Modal */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    display: none;
-    z-index: 2000;
+/* Dashboard */
+.dashboard-grid {
+    display: grid;
+    gap: 3rem;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 2rem;
+    border-radius: 24px;
+    text-align: center;
+}
+
+.stat-card h3 {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-card span {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.app-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 1.5rem;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
+    margin-bottom: 1rem;
+    transition: var(--transition);
+}
+
+.app-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.app-info h4 {
+    margin-bottom: 0.3rem;
+}
+
+.app-info p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-pending {
+    background: rgba(250, 204, 21, 0.1);
+    color: #facc15;
+}
+
+.status-interviewing {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
+}
+
+.status-offer {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.status-rejected {
+    background: rgba(244, 63, 94, 0.1);
+    color: var(--accent);
+}
+
+/* Admin Tabs */
+.admin-section.hidden {
+    display: none;
 }
 
 .modal.active {
