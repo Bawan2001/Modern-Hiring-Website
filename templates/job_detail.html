@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }} at {{ job.company.name }}{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container">
+        <div class="job-detail-layout">
+            <!-- Main Content -->
+            <div class="job-detail-main">
+                <div class="job-detail-header">
+                    <div class="job-header-top">
+                        <a href="{{ url_for('index') }}" class="back-link">← Back to Jobs</a>
+                        <span class="job-type-badge">{{ job.job_type }}</span>
+                        {% if job.is_remote %}
+                        <span class="remote-badge">🌍 Remote Available</span>
+                        {% endif %}
+                    </div>
+
+                    <h1>{{ job.title }}</h1>
+
+                    <div class="job-header-meta">
+                        <div class="company-info">
+                            {% if job.company.logo_path %}
+                            <img src="{{ url_for('static', filename='uploads/' + job.company.logo_path) }}"
+                                alt="{{ job.company.name }}" class="company-logo-small">
+                            {% else %}
+                            <div class="company-logo-placeholder">{{ job.company.name[0] }}</div>
+                            {% endif %}
+                            <div>
+                                <h3>{{ job.company.name }}</h3>
+                                {% if job.company.industry %}
+                                <span class="company-industry">{{ job.company.industry }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="job-quick-info">
+                        <div class="info-item">
+                            <span class="info-icon">📍</span>
+                            <span>{{ job.location }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">💰</span>
+                            <span>{{ job.format_salary() }}</span>
+                        </div>
+                        {% if job.experience_level %}
+                        <div class="info-item">
+                            <span class="info-icon">📊</span>
+                            <span>{{ job.experience_level }} Level</span>
+                        </div>
+                        {% endif %}
+                        {% if job.category %}
+                        <div class="info-item">
+                            <span class="info-icon">{{ job.category.icon }}</span>
+                            <span>{{ job.category.name }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="info-item">
+                            <span class="info-icon">📅</span>
+                            <span>Posted {{ job.posted_date.strftime('%B %d, %Y') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="job-detail-section">
+                    <h2>Job Description</h2>
+                    <div class="description-content">
+                        {{ job.description | replace('\n', '<br>') | safe }}
+                    </div>
+                </div>
+
+                {% if job.requirements %}
+                <div class="job-detail-section">
+                    <h2>Requirements</h2>
+                    <div class="requirements-content">
+                        {{ job.requirements | replace('\n', '<br>') | safe }}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if job.responsibilities %}
+                <div class="job-detail-section">
+                    <h2>Responsibilities</h2>
+                    <div class="responsibilities-content">
+                        {{ job.responsibilities | replace('\n', '<br>') | safe }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="job-detail-sidebar">
+                <div class="apply-card">
+                    <h3>Interested in this role?</h3>
+
+                    {% if current_user.is_authenticated %}
+                    {% if current_user.is_jobseeker() %}
+                    {% if has_applied %}
+                    <div class="already-applied">
+                        <span class="check-icon">✓</span>
+                        <p>You've already applied to this position.</p>
+                        <a href="{{ url_for('my_applications') }}" class="btn-secondary">View Applications</a>
+                    </div>
+                    {% else %}
+                    <button class="btn-primary btn-block" onclick="openApplyModal()">Apply Now</button>
+                    <p class="apply-note">Your profile resume will be attached automatically</p>
+                    {% endif %}
+                    {% elif current_user.is_employer() %}
+                    <p class="info-note">🏢 Switch to a job seeker account to apply.</p>
+                    {% else %}
+                    <p class="info-note">👤 This feature is for job seekers only.</p>
+                    {% endif %}
+                    {% else %}
+                    <a href="{{ url_for('login') }}?next={{ request.url }}" class="btn-primary btn-block">Login to
+                        Apply</a>
+                    <p class="apply-note">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+                    {% endif %}
+                </div>
+
+                <!-- Company Info -->
+                <div class="company-card">
+                    <h3>About {{ job.company.name }}</h3>
+                    {% if job.company.description %}
+                    <p>{{ job.company.description[:200] }}{% if job.company.description|length > 200 %}...{% endif %}
+                    </p>
+                    {% endif %}
+                    {% if job.company.website %}
+                    <a href="{{ job.company.website }}" target="_blank" class="company-link">Visit Website →</a>
+                    {% endif %}
+                    <div class="company-details">
+                        {% if job.company.location %}
+                        <div class="detail-item">📍 {{ job.company.location }}</div>
+                        {% endif %}
+                        {% if job.company.size %}
+                        <div class="detail-item">👥 {{ job.company.size }} employees</div>
+                        {% endif %}
+                        {% if job.company.industry %}
+                        <div class="detail-item">🏭 {{ job.company.industry }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Job Stats -->
+                <div class="stats-card">
+                    <div class="stat-row">
+                        <span>👁️ Views</span>
+                        <span>{{ job.views }}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>📝 Applications</span>
+                        <span>{{ job.applications.count() }}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>⏰ Expires</span>
+                        <span>{{ job.expiry_date.strftime('%b %d, %Y') if job.expiry_date else 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Similar Jobs -->
+        {% if similar_jobs %}
+        <div class="similar-jobs-section">
+            <h2>Similar Opportunities</h2>
+            <div class="jobs-grid similar-grid">
+                {% for similar in similar_jobs %}
+                <a href="{{ url_for('job_detail', job_id=similar.id) }}" class="job-card">
+                    <span class="job-type">{{ similar.job_type }}</span>
+                    <h3 class="job-title">{{ similar.title }}</h3>
+                    <p class="company-name">🏢 {{ similar.company.name }}</p>
+                    <div class="job-details">
+                        <span class="job-location">📍 {{ similar.location }}</span>
+                        <span class="job-salary">{{ similar.format_salary() }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Apply Modal -->
+{% if current_user.is_authenticated and current_user.is_jobseeker() and not has_applied %}
+<div id="apply-modal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeApplyModal()">×</button>
+        <h3>Apply for {{ job.title }}</h3>
+        <p class="modal-subtitle">at {{ job.company.name }}</p>
+
+        <form method="POST" action="{{ url_for('apply_job', job_id=job.id) }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label for="cover_letter">Cover Letter / Pitch (Optional)</label>
+                <textarea name="cover_letter" id="cover_letter" rows="6"
+                    placeholder="Tell us why you're a great fit for this role..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Resume</label>
+                {% if current_user.resume_path %}
+                <div class="current-resume">
+                    <span>📄 Current resume will be attached</span>
+                    <span class="text-muted">Or upload a different one:</span>
+                </div>
+                {% else %}
+                <div class="no-resume-warning">
+                    ⚠️ No resume on file. Please upload one or update your profile.
+                </div>
+                {% endif %}
+                <input type="file" name="resume" accept=".pdf,.doc,.docx" class="file-input">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeApplyModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Submit Application</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openApplyModal() {
+        document.getElementById('apply-modal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeApplyModal() {
+        document.getElementById('apply-modal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    document.getElementById('apply-modal').addEventListener('click', function (e) {
+        if (e.target === this) closeApplyModal();
+    });
+</script>
+{% endif %}
+{% endblock %}
