@@ -1,92 +1,150 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JobSphere | Find Your Dream Career</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-</head>
+{% block title %}Find Your Dream Career{% endblock %}
 
-<body>
-    <header class="navbar">
-        <div class="container">
-            <a href="/" class="logo">Job<span>Sphere</span></a>
-            <nav>
-                <ul>
-                    <li><a href="#jobs">Browse Jobs</a></li>
-                    <li><a href="/ats">ATS Checker</a></li>
-                    {% if user %}
-                    <li><a href="/dashboard">My Dashboard</a></li>
-                    {% if user.role == 'admin' %}
-                    <li><a href="/admin">Admin Hub</a></li>
-                    {% endif %}
-                    <li class="user-greeting">Hi, <span>{{ user.name.split(' ')[0] }}</span></li>
-                    <li><a href="/logout">Logout</a></li>
-                    {% else %}
-                    <li><a href="/login">Login</a></li>
-                    {% endif %}
-                    <li><a href="#" class="btn-primary">Post a Job</a></li>
-                </ul>
-            </nav>
+{% block content %}
+<section class="hero">
+    <div class="overlay"></div>
+    <div class="container hero-content">
+        <h1>Unlock Your <span>Potential</span></h1>
+        <p>Connecting elite talent with the world's most innovative companies.</p>
+        <form class="search-bar" action="{{ url_for('index') }}" method="GET">
+            <input type="text" name="search" placeholder="Job title, keywords..." value="{{ search }}"
+                id="search-input">
+            <input type="text" name="location" placeholder="Location..." value="{{ location }}" class="location-input">
+            <button type="submit" class="btn-search">Search Jobs</button>
+        </form>
+    </div>
+</section>
+
+<section class="job-listings" id="jobs">
+    <div class="container">
+        <div class="section-header">
+            <h2>Featured Opportunities</h2>
+            <p>Hand-picked roles for top-tier professionals</p>
         </div>
-    </header>
 
-    <main>
-        <section class="hero">
-            <div class="overlay"></div>
-            <div class="container hero-content">
-                <h1>Unlock Your <span>Potential</span></h1>
-                <p>Connecting elite talent with the world's most innovative companies.</p>
-                <div class="search-bar">
-                    <input type="text" placeholder="Job title, keywords..." id="search-input">
-                    <button class="btn-search">Search Jobs</button>
-                </div>
-            </div>
-        </section>
+        <!-- Filters -->
+        <div class="filter-bar">
+            <form class="filters-form" action="{{ url_for('index') }}" method="GET">
+                <input type="hidden" name="search" value="{{ search }}">
+                <input type="hidden" name="location" value="{{ location }}">
 
-        <section class="job-listings" id="jobs">
-            <div class="container">
-                <div class="section-header">
-                    <h2>Featured Opportunities</h2>
-                    <p>Hand-picked roles for top-tier professionals</p>
+                <div class="filter-group">
+                    <label>Category</label>
+                    <select name="category" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if category_id==cat.id %}selected{% endif %}>
+                            {{ cat.icon }} {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <div class="jobs-grid" id="jobs-container">
-                    <!-- Jobs will be injected here -->
-                    <div class="loader"></div>
-                </div>
-            </div>
-        </section>
-    </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 JobSphere. All rights reserved. Created with passion for careers.</p>
-        </div>
-    </footer>
+                <div class="filter-group">
+                    <label>Job Type</label>
+                    <select name="job_type" onchange="this.form.submit()">
+                        <option value="">All Types</option>
+                        <option value="Full-time" {% if job_type=='Full-time' %}selected{% endif %}>Full-time</option>
+                        <option value="Part-time" {% if job_type=='Part-time' %}selected{% endif %}>Part-time</option>
+                        <option value="Contract" {% if job_type=='Contract' %}selected{% endif %}>Contract</option>
+                        <option value="Remote" {% if job_type=='Remote' %}selected{% endif %}>Remote</option>
+                        <option value="Internship" {% if job_type=='Internship' %}selected{% endif %}>Internship
+                        </option>
+                    </select>
+                </div>
 
-    <!-- Application Modal -->
-    <div id="apply-modal" class="modal">
-        <div class="modal-content">
-            <h3>Apply for <span id="apply-job-title">Job</span></h3>
-            <form id="apply-form">
-                <input type="hidden" id="apply-job-id">
-                <div class="form-group">
-                    <label>Cover Letter / Pitch</label>
-                    <textarea id="cover-letter" placeholder="Tell us why you're a great fit..." required></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="close-apply-modal">Cancel</button>
-                    <button type="submit" class="btn-primary">Submit Application</button>
-                </div>
+                {% if search or location or job_type or category_id %}
+                <a href="{{ url_for('index') }}" class="btn-secondary clear-filters">Clear Filters</a>
+                {% endif %}
             </form>
         </div>
+
+        <!-- Jobs Grid -->
+        <div class="jobs-grid" id="jobs-container">
+            {% if jobs.items %}
+            {% for job in jobs.items %}
+            <a href="{{ url_for('job_detail', job_id=job.id) }}" class="job-card">
+                <span class="job-type">{{ job.job_type }}</span>
+                {% if job.is_remote %}
+                <span class="remote-badge">🌍 Remote</span>
+                {% endif %}
+                <h3 class="job-title">{{ job.title }}</h3>
+                <p class="company-name">🏢 {{ job.company.name }}</p>
+                <div class="job-meta">
+                    {% if job.category %}
+                    <span class="job-category">{{ job.category.icon }} {{ job.category.name }}</span>
+                    {% endif %}
+                </div>
+                <div class="job-details">
+                    <span class="job-location">📍 {{ job.location }}</span>
+                    <span class="job-salary">{{ job.format_salary() }}</span>
+                </div>
+            </a>
+            {% endfor %}
+            {% else %}
+            <div class="no-results">
+                <h3>No jobs found</h3>
+                <p>Try adjusting your search filters or check back later for new opportunities.</p>
+                {% if search or location or job_type or category_id %}
+                <a href="{{ url_for('index') }}" class="btn-primary">Clear Filters</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        {% if jobs.pages > 1 %}
+        <div class="pagination">
+            {% if jobs.has_prev %}
+            <a href="{{ url_for('index', page=jobs.prev_num, search=search, location=location, job_type=job_type, category=category_id) }}"
+                class="page-link">← Previous</a>
+            {% endif %}
+
+            <div class="page-numbers">
+                {% for page_num in jobs.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                <a href="{{ url_for('index', page=page_num, search=search, location=location, job_type=job_type, category=category_id) }}"
+                    class="page-link {% if page_num == jobs.page %}active{% endif %}">
+                    {{ page_num }}
+                </a>
+                {% else %}
+                <span class="page-ellipsis">...</span>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if jobs.has_next %}
+            <a href="{{ url_for('index', page=jobs.next_num, search=search, location=location, job_type=job_type, category=category_id) }}"
+                class="page-link">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
+</section>
 
-    <!-- Job Posting Modal (for Admin) -->
-    <div id="job-modal" class="modal">
-        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-
-</html>
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number">{{ jobs.total }}+</span>
+                <span class="stat-label">Active Jobs</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">500+</span>
+                <span class="stat-label">Companies</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">10K+</span>
+                <span class="stat-label">Job Seekers</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">95%</span>
+                <span class="stat-label">Success Rate</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

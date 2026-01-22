@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Employer Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container">
+        <div class="dashboard-header">
+            <div class="welcome-section">
+                <h1>Welcome, {{ current_user.name }}</h1>
+                <p>Manage your job postings and track applicants</p>
+            </div>
+            <a href="{{ url_for('employer_job_new') }}" class="btn-primary">
+                <span>+</span> Post New Job
+            </a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon">💼</div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ total_jobs }}</span>
+                    <span class="stat-label">Total Jobs</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ active_jobs }}</span>
+                    <span class="stat-label">Active Jobs</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📝</div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ total_applications }}</span>
+                    <span class="stat-label">Total Applications</span>
+                </div>
+            </div>
+            <div class="stat-card highlight">
+                <div class="stat-icon">🔔</div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ pending_applications }}</span>
+                    <span class="stat-label">Pending Review</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Recent Applications -->
+            <div class="dashboard-section">
+                <div class="section-header-inline">
+                    <h2>Recent Applications</h2>
+                    {% if recent_applications %}
+                    <a href="{{ url_for('employer_jobs') }}" class="link">View All Jobs →</a>
+                    {% endif %}
+                </div>
+
+                {% if recent_applications %}
+                <div class="applications-list compact">
+                    {% for app in recent_applications %}
+                    <div class="application-item">
+                        <div class="applicant-info">
+                            <div class="applicant-avatar">{{ app.applicant.name[0] }}</div>
+                            <div>
+                                <h4>{{ app.applicant.name }}</h4>
+                                <p>Applied for <strong>{{ app.job.title }}</strong></p>
+                                <span class="apply-date">{{ app.applied_date.strftime('%b %d, %Y') }}</span>
+                            </div>
+                        </div>
+                        <div class="app-actions-inline">
+                            <span class="status-badge status-{{ app.status | lower }}">{{ app.status }}</span>
+                            <a href="{{ url_for('employer_job_applicants', job_id=app.job_id) }}" class="btn-icon"
+                                title="View">👁️</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state-small">
+                    <p>No applications yet. Post a job to start receiving applications!</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Company Profile -->
+            <div class="dashboard-section">
+                <div class="section-header-inline">
+                    <h2>Company Profile</h2>
+                    <a href="{{ url_for('employer_profile') }}" class="link">Edit →</a>
+                </div>
+
+                <div class="company-profile-card">
+                    <div class="company-header">
+                        {% if company.logo_path %}
+                        <img src="{{ url_for('static', filename='uploads/' + company.logo_path) }}"
+                            alt="{{ company.name }}" class="company-logo">
+                        {% else %}
+                        <div class="company-logo-placeholder large">{{ company.name[0] }}</div>
+                        {% endif %}
+                        <div>
+                            <h3>{{ company.name }}</h3>
+                            {% if company.industry %}
+                            <span class="industry-tag">{{ company.industry }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if company.description %}
+                    <p class="company-desc">{{ company.description[:150] }}{% if company.description|length > 150
+                        %}...{% endif %}</p>
+                    {% else %}
+                    <p class="text-muted">Add a company description to attract more candidates.</p>
+                    {% endif %}
+
+                    <div class="company-meta">
+                        {% if company.location %}
+                        <span>📍 {{ company.location }}</span>
+                        {% endif %}
+                        {% if company.size %}
+                        <span>👥 {{ company.size }}</span>
+                        {% endif %}
+                        {% if company.website %}
+                        <a href="{{ company.website }}" target="_blank">🌐 Website</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="{{ url_for('employer_job_new') }}" class="action-card">
+                    <span class="action-icon">📝</span>
+                    <span class="action-title">Post a Job</span>
+                </a>
+                <a href="{{ url_for('employer_jobs') }}" class="action-card">
+                    <span class="action-icon">📋</span>
+                    <span class="action-title">Manage Jobs</span>
+                </a>
+                <a href="{{ url_for('employer_profile') }}" class="action-card">
+                    <span class="action-icon">🏢</span>
+                    <span class="action-title">Edit Profile</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
