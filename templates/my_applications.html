@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}My Applications{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container">
+        <div class="page-header">
+            <h1>My Applications</h1>
+            <p>Track your job applications and their status</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="status-filters">
+                <a href="{{ url_for('my_applications') }}"
+                    class="status-filter {% if not status_filter %}active{% endif %}">All</a>
+                <a href="{{ url_for('my_applications', status='Pending') }}"
+                    class="status-filter {% if status_filter == 'Pending' %}active{% endif %}">Pending</a>
+                <a href="{{ url_for('my_applications', status='Reviewed') }}"
+                    class="status-filter {% if status_filter == 'Reviewed' %}active{% endif %}">Reviewed</a>
+                <a href="{{ url_for('my_applications', status='Shortlisted') }}"
+                    class="status-filter {% if status_filter == 'Shortlisted' %}active{% endif %}">Shortlisted</a>
+                <a href="{{ url_for('my_applications', status='Rejected') }}"
+                    class="status-filter {% if status_filter == 'Rejected' %}active{% endif %}">Rejected</a>
+                <a href="{{ url_for('my_applications', status='Hired') }}"
+                    class="status-filter {% if status_filter == 'Hired' %}active{% endif %}">Hired</a>
+            </div>
+        </div>
+
+        <!-- Applications List -->
+        {% if applications %}
+        <div class="applications-list">
+            {% for app in applications %}
+            <div class="application-card">
+                <div class="app-main">
+                    <div class="app-info">
+                        <h3>{{ app.job.title }}</h3>
+                        <p class="app-company">🏢 {{ app.job.company.name }}</p>
+                        <div class="app-meta">
+                            <span>📍 {{ app.job.location }}</span>
+                            <span>💼 {{ app.job.job_type }}</span>
+                            <span>📅 Applied {{ app.applied_date.strftime('%b %d, %Y') }}</span>
+                        </div>
+                    </div>
+                    <div class="app-status">
+                        <span class="status-badge status-{{ app.status | lower }}">{{ app.status }}</span>
+                    </div>
+                </div>
+                {% if app.cover_letter %}
+                <div class="app-cover-letter">
+                    <strong>Your Cover Letter:</strong>
+                    <p>{{ app.cover_letter[:200] }}{% if app.cover_letter|length > 200 %}...{% endif %}</p>
+                </div>
+                {% endif %}
+                <div class="app-actions">
+                    <a href="{{ url_for('job_detail', job_id=app.job_id) }}" class="btn-secondary btn-small">View
+                        Job</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <h3>No applications yet</h3>
+            <p>Start applying to jobs to track your progress here</p>
+            <a href="{{ url_for('index') }}" class="btn-primary">Browse Jobs</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

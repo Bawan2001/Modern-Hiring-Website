@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container">
+        <div class="page-header">
+            <h1>My Profile</h1>
+            <p>Manage your personal information and resume</p>
+        </div>
+
+        <div class="profile-layout">
+            <div class="profile-sidebar">
+                <div class="profile-card">
+                    <div class="avatar-large">{{ current_user.name[0] }}</div>
+                    <h3>{{ current_user.name }}</h3>
+                    <p class="email">{{ current_user.email }}</p>
+                    <span class="role-badge">{{ current_user.role | title }}</span>
+                </div>
+
+                <div class="resume-card">
+                    <h4>📄 Resume / CV</h4>
+                    {% if current_user.resume_path %}
+                    <div class="resume-info">
+                        <span class="resume-name">Resume uploaded</span>
+                        <a href="{{ url_for('download_resume', filename=current_user.resume_path) }}"
+                            class="btn-secondary btn-small">Download</a>
+                    </div>
+                    {% else %}
+                    <p class="no-resume">No resume uploaded yet</p>
+                    {% endif %}
+                    <p class="resume-note">Upload a new resume using the form</p>
+                </div>
+
+                <div class="quick-stats">
+                    <h4>📊 Quick Stats</h4>
+                    <div class="stat-item-small">
+                        <span>Applications</span>
+                        <strong>{{ current_user.applications.count() }}</strong>
+                    </div>
+                    <div class="stat-item-small">
+                        <span>Member Since</span>
+                        <strong>{{ current_user.created_at.strftime('%b %Y') }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-main">
+                <div class="form-card">
+                    <h2>Personal Information</h2>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">{{ form.name.label.text }}</label>
+                                {{ form.name(class="form-control") }}
+                                {% if form.name.errors %}
+                                <span class="error-text">{{ form.name.errors[0] }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone">{{ form.phone.label.text }}</label>
+                                {{ form.phone(class="form-control", placeholder="+1 (555) 123-4567") }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">{{ form.location.label.text }}</label>
+                            {{ form.location(class="form-control", placeholder="City, Country") }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="skills">{{ form.skills.label.text }}</label>
+                            {{ form.skills(class="form-control", placeholder="Python, JavaScript, Project Management,
+                            etc.") }}
+                            <span class="form-help">Separate skills with commas</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bio">{{ form.bio.label.text }}</label>
+                            {{ form.bio(class="form-control", rows="4", placeholder="Tell employers about yourself...")
+                            }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resume">Upload Resume (PDF, DOC, DOCX)</label>
+                            <div class="file-upload-area">
+                                {{ form.resume(class="file-input", accept=".pdf,.doc,.docx") }}
+                                <div class="file-upload-label">
+                                    <span class="upload-icon">📁</span>
+                                    <span>Click to upload or drag and drop</span>
+                                    <span class="file-types">PDF, DOC, DOCX (max 5MB)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
