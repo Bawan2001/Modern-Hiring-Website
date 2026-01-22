@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card register-card">
+        <div class="auth-icon">🚀</div>
+        <h2>Join JobSphere</h2>
+        <p>Start your career journey today</p>
+
+        <form method="POST" action="{{ url_for('register') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                <label>I want to:</label>
+                <div class="role-selector">
+                    <label class="role-option">
+                        <input type="radio" name="role" value="jobseeker" {% if form.role.data=='jobseeker' or not
+                            form.role.data %}checked{% endif %}>
+                        <div class="role-card">
+                            <span class="role-icon">👤</span>
+                            <span class="role-title">Find a Job</span>
+                            <span class="role-desc">Browse and apply to opportunities</span>
+                        </div>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="role" value="employer" {% if form.role.data=='employer' %}checked{%
+                            endif %}>
+                        <div class="role-card">
+                            <span class="role-icon">🏢</span>
+                            <span class="role-title">Hire Talent</span>
+                            <span class="role-desc">Post jobs and find candidates</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="name">{{ form.name.label.text }}</label>
+                {{ form.name(class="form-control", placeholder="Enter your full name") }}
+                {% if form.name.errors %}
+                <span class="error-text">{{ form.name.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="email">{{ form.email.label.text }}</label>
+                {{ form.email(class="form-control", placeholder="Enter your email") }}
+                {% if form.email.errors %}
+                <span class="error-text">{{ form.email.errors[0] }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="phone">{{ form.phone.label.text }} (Optional)</label>
+                {{ form.phone(class="form-control", placeholder="Enter your phone number") }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">{{ form.password.label.text }}</label>
+                    {{ form.password(class="form-control", placeholder="Create password") }}
+                    {% if form.password.errors %}
+                    <span class="error-text">{{ form.password.errors[0] }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">{{ form.confirm_password.label.text }}</label>
+                    {{ form.confirm_password(class="form-control", placeholder="Confirm password") }}
+                    {% if form.confirm_password.errors %}
+                    <span class="error-text">{{ form.confirm_password.errors[0] }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary btn-block">Create Account</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

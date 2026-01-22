@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container">
+        <div class="page-header">
+            <h1>Manage Users</h1>
+            <p>View and manage all registered users</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="status-filters">
+                <a href="{{ url_for('admin_users') }}"
+                    class="status-filter {% if not role_filter %}active{% endif %}">All Users</a>
+                <a href="{{ url_for('admin_users', role='jobseeker') }}"
+                    class="status-filter {% if role_filter == 'jobseeker' %}active{% endif %}">Job Seekers</a>
+                <a href="{{ url_for('admin_users', role='employer') }}"
+                    class="status-filter {% if role_filter == 'employer' %}active{% endif %}">Employers</a>
+                <a href="{{ url_for('admin_users', role='admin') }}"
+                    class="status-filter {% if role_filter == 'admin' %}active{% endif %}">Admins</a>
+            </div>
+        </div>
+
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users.items %}
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-small">{{ user.name[0] }}</div>
+                                <span>{{ user.name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td><span class="role-badge {{ user.role }}">{{ user.role | title }}</span></td>
+                        <td>
+                            {% if user.is_active %}
+                            <span class="status-badge status-shortlisted">Active</span>
+                            {% else %}
+                            <span class="status-badge status-rejected">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                        <td>
+                            {% if not user.is_admin() %}
+                            <form action="{{ url_for('admin_toggle_user', user_id=user.id) }}" method="POST"
+                                style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn-secondary btn-small">
+                                    {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted">Protected</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if users.pages > 1 %}
+        <div class="pagination">
+            {% if users.has_prev %}
+            <a href="{{ url_for('admin_users', page=users.prev_num, role=role_filter) }}" class="page-link">←
+                Previous</a>
+            {% endif %}
+            <div class="page-numbers">
+                {% for page_num in users.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                <a href="{{ url_for('admin_users', page=page_num, role=role_filter) }}"
+                    class="page-link {% if page_num == users.page %}active{% endif %}">{{ page_num }}</a>
+                {% else %}
+                <span class="page-ellipsis">...</span>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% if users.has_next %}
+            <a href="{{ url_for('admin_users', page=users.next_num, role=role_filter) }}" class="page-link">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
