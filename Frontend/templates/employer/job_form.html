@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_edit %}Edit{% else %}Post New{% endif %} Job{% endblock %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container">
+        <div class="page-header">
+            <h1>{% if is_edit %}Edit Job Posting{% else %}Post a New Job{% endif %}</h1>
+            <p>{% if is_edit %}Update your job listing{% else %}Create a job listing to find the perfect candidate{%
+                endif %}</p>
+        </div>
+
+        <div class="form-card">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="form-section">
+                    <h3>Job Details</h3>
+
+                    <div class="form-group">
+                        <label for="title">{{ form.title.label.text }} *</label>
+                        {{ form.title(class="form-control", placeholder="e.g., Senior Software Engineer") }}
+                        {% if form.title.errors %}
+                        <span class="error-text">{{ form.title.errors[0] }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category_id">{{ form.category_id.label.text }}</label>
+                            {{ form.category_id(class="form-control") }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="job_type">{{ form.job_type.label.text }}</label>
+                            {{ form.job_type(class="form-control") }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="experience_level">{{ form.experience_level.label.text }}</label>
+                            {{ form.experience_level(class="form-control") }}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group flex-2">
+                            <label for="location">{{ form.location.label.text }} *</label>
+                            {{ form.location(class="form-control", placeholder="e.g., San Francisco, CA") }}
+                            {% if form.location.errors %}
+                            <span class="error-text">{{ form.location.errors[0] }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group checkbox-inline">
+                            {{ form.is_remote() }}
+                            <label for="is_remote">Remote work available</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Compensation</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="salary_min">{{ form.salary_min.label.text }}</label>
+                            <div class="input-with-prefix">
+                                <span class="input-prefix">$</span>
+                                {{ form.salary_min(class="form-control", placeholder="50000") }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="salary_max">{{ form.salary_max.label.text }}</label>
+                            <div class="input-with-prefix">
+                                <span class="input-prefix">$</span>
+                                {{ form.salary_max(class="form-control", placeholder="80000") }}
+                            </div>
+                        </div>
+
+                        {% if not is_edit %}
+                        <div class="form-group">
+                            <label for="expiry_days">{{ form.expiry_days.label.text }}</label>
+                            {{ form.expiry_days(class="form-control") }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Job Description</h3>
+
+                    <div class="form-group">
+                        <label for="description">Description * (Minimum 50 characters)</label>
+                        {{ form.description(class="form-control", rows="8", placeholder="Describe the role, what the
+                        candidate will be doing, and what makes this opportunity exciting...") }}
+                        {% if form.description.errors %}
+                        <span class="error-text">{{ form.description.errors[0] }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requirements">{{ form.requirements.label.text }}</label>
+                        {{ form.requirements(class="form-control", rows="5", placeholder="List the required skills,
+                        qualifications, and experience...\n- 3+ years of experience\n- Bachelor's degree") }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="responsibilities">{{ form.responsibilities.label.text }}</label>
+                        {{ form.responsibilities(class="form-control", rows="5", placeholder="What will the candidate be
+                        responsible for?\n- Design and develop features\n- Collaborate with team") }}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('employer_jobs') }}" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary">
+                        {% if is_edit %}Update Job{% else %}Post Job{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
