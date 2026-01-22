@@ -10,10 +10,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.ORG_ID }}
-          vercel-project-id: ${{ secrets.PROJECT_ID }}
-          vercel-args: '--prod'
+      - name: Deploy to PythonAnywhere
+        run: |
+          # Pull latest code on PythonAnywhere
+          curl -X POST \
+            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+            "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/consoles/" \
+            -d "executable=bash" \
+            -d "arguments=-c 'cd ~/Modern-Hiring-Website && git pull origin main'"
+          
+          # Reload the web app
+          curl -X POST \
+            -H "Authorization: Token ${{ secrets.PA_API_TOKEN }}" \
+            "https://www.pythonanywhere.com/api/v0/user/${{ secrets.PA_USERNAME }}/webapps/${{ secrets.PA_USERNAME }}.pythonanywhere.com/reload/"
+          
+          echo "✅ Deployed to PythonAnywhere successfully!"
