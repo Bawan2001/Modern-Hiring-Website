@@ -9,6 +9,7 @@ from flask import (Flask, render_template, redirect, url_for, flash, request,
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
+from whitenoise import WhiteNoise
 
 from config import Config
 from models import db, User, Company, Category, Job, Application
@@ -16,7 +17,8 @@ from forms import (LoginForm, RegistrationForm, ProfileForm, CompanyForm,
                    JobForm, ApplicationForm, CategoryForm, ApplicationStatusForm)
 
 # Initialize Flask app
-app = Flask(__name__, template_folder='templates', static_folder='public/static')
+app = Flask(__name__, template_folder='templates', static_folder='static')
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static/')
 app.config.from_object(Config)
 
 # Initialize extensions
