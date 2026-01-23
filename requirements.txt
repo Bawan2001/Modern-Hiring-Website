@@ -4,7 +4,7 @@ flask-login
 flask-wtf
 python-dotenv
 email-validator
-pytest
-flake8
+werkzeug
+psycopg2-binary
 PyPDF2
 python-docx
