@@ -44,10 +44,14 @@ We strictly followed a professional Git workflow:
 ### J.W.A.Indumini Adarshya
 - **Full-Stack Development**: Implemented core Backend API and Frontend UI.
 - **Authentication**: Developed secure Login and Registration systems.
-- **Business Logic**: Wrote core logic for Job and Application handling.
+- **Business Logic**: Wrote core logic for Job and Application handling, Job posting and job listing features.
 - **ATS Implementation**: Developed the resume keyword matching algorithm.
 
-*(Please edit the above contributions to match your actual work)*
+
+
+
+
+
 
 ## Setup Instructions
 
