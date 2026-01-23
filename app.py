@@ -17,8 +17,8 @@ from forms import (LoginForm, RegistrationForm, ProfileForm, CompanyForm,
                    JobForm, ApplicationForm, CategoryForm, ApplicationStatusForm)
 
 # Initialize Flask app
-app = Flask(__name__, template_folder='templates', static_folder='static')
-app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static/')
+app = Flask(__name__, template_folder='src/templates', static_folder='src/static')
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='src/static/', prefix='static/')
 app.config.from_object(Config)
 
 # Initialize extensions
