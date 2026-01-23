@@ -16,7 +16,7 @@ from forms import (LoginForm, RegistrationForm, ProfileForm, CompanyForm,
                    JobForm, ApplicationForm, CategoryForm, ApplicationStatusForm)
 
 # Initialize Flask app
-app = Flask(__name__, template_folder='../Frontend/templates', static_folder='../Frontend/static')
+app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config.from_object(Config)
 
 # Initialize extensions
