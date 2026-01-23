@@ -1075,8 +1075,15 @@ def internal_error(error):
 
 # ========== CREATE TABLES & SEED DATA ==========
 with app.app_context():
-    db.create_all()
-    seed_database()
+    try:
+        db.create_all()
+        # Only seed if tables were just created (naive check, but safe)
+        if not User.query.first():
+            seed_database()
+    except Exception as e:
+        print(f"Database initialization error: {e}")
+        # On Vercel, we might not be able to seed if unrelated errors occur, but app should still start
+        pass
 
 
 if __name__ == '__main__':

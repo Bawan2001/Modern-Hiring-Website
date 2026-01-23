@@ -12,8 +12,13 @@ class Config:
     WTF_CSRF_ENABLED = True
     
     # SQLite Database (Free, no server required)
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'jobsphere.db')
+    # SQLite Database (Free, no server required)
+    # Check if running on Vercel (read-only file system)
+    if os.environ.get('VERCEL'):
+        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:////tmp/jobsphere.db'
+    else:
+        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+            'sqlite:///' + os.path.join(basedir, 'jobsphere.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Session
