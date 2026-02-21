@@ -11,3 +11,4 @@ python-docx
 werkzeug
 psycopg2-binary
 whitenoise
+gunicorn

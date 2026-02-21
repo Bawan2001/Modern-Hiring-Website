@@ -1,0 +1,87 @@
+# =============================================================================
+# docker-compose.yml — Modern Hiring Website (JobSphere)
+# =============================================================================
+# Orchestrates the complete application stack.  Run with:
+#     docker compose up --build
+#
+# This file demonstrates:
+#   - Service definition and build configuration
+#   - Volume management for persistent data (SQLite DB + uploads)
+#   - Environment variable externalisation
+#   - Health-check integration
+#   - Container networking
+#   - Restart policies for reliability
+# =============================================================================
+
+services:
+  # ---- Web Application Service ----
+  web:
+    # Build the image from the Dockerfile in the current directory
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # Name the running container for easier identification
+    container_name: jobsphere-web
+
+    # Map container port 5000 to host port 5000
+    ports:
+      - "${PORT:-5000}:5000"
+
+    # ---------- Environment Variables ----------
+    # Externalising configuration follows the 12-Factor App methodology.
+    # Values can be overridden via a .env file or shell exports.
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-jobsphere-docker-secret-key-2026}
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - PORT=5000
+      - DATABASE_URL=${DATABASE_URL:-}
+
+    # ---------- Persistent Volumes ----------
+    # SQLite database and user uploads are stored on named volumes so data
+    # survives container restarts and image rebuilds.
+    volumes:
+      - app-data:/app/data
+      - app-uploads:/app/uploads
+
+    # ---------- Health Check ----------
+    # Mirrors the HEALTHCHECK in the Dockerfile; docker-compose can also
+    # report health status via `docker compose ps`.
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/" ]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
+
+    # ---------- Resource Limits ----------
+    # Constraining CPU and memory prevents a single container from
+    # monopolising host resources — critical in shared or production
+    # environments.  Values below suit a lightweight Flask + SQLite app;
+    # adjust for heavier workloads or additional services.
+    mem_limit: 512m
+    cpus: '1.0'
+
+    # ---------- Restart Policy ----------
+    # Automatically restart the container on failure or host reboot,
+    # unless the operator explicitly stops it.
+    restart: unless-stopped
+
+    # ---------- Networking ----------
+    # Attach the service to a dedicated bridge network for isolation.
+    networks:
+      - jobsphere-net
+
+# ---------- Named Volumes ----------
+# Docker manages these volumes; data persists independently of containers.
+volumes:
+  app-data:
+    driver: local
+  app-uploads:
+    driver: local
+
+# ---------- Networks ----------
+# A custom bridge network provides DNS-based service discovery and isolation.
+networks:
+  jobsphere-net:
+    driver: bridge

@@ -1,0 +1,57 @@
+# =============================================================================
+# .dockerignore — Modern Hiring Website
+# =============================================================================
+# Files listed here are excluded from the Docker build context.  This:
+#   1. Reduces the amount of data sent to the Docker daemon (faster builds)
+#   2. Prevents secrets (.env) and unnecessary artefacts from leaking into the
+#      image, improving security and keeping the image lean.
+# =============================================================================
+
+# ---------- Version control ----------
+.git
+.gitignore
+.github
+
+# ---------- Python artefacts ----------
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+venv/
+.venv/
+.pytest_cache/
+
+# ---------- Environment & secrets ----------
+.env
+*.env
+
+# ---------- Database files ----------
+# The SQLite database is mounted as a Docker volume at runtime; we do not want
+# a stale copy baked into the image.
+*.db
+
+# ---------- IDE / editor files ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---------- OS files ----------
+.DS_Store
+Thumbs.db
+
+# ---------- Build artefacts ----------
+dist/
+build/
+node_modules/
+
+# ---------- Documentation & config not needed at runtime ----------
+*.md
+LICENSE
+vercel.json
+
+# ---------- Docker files (avoid recursive context) ----------
+Dockerfile
+docker-compose.yml
+docker-compose*.yml
